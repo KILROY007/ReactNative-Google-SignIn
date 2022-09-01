@@ -11,6 +11,7 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
 
 GoogleSignin.configure({
   webClientId:
@@ -20,29 +21,14 @@ GoogleSignin.configure({
 // create a component
 const App = () => {
   const googleSignin = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      console.log('====================================');
-      console.log('User Info', userInfo);
-      console.log('====================================');
-    } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-        console.log(error);
-        console.log('====================================');
-        console.log('====================================');
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-        console.log(error);
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-        console.log(error);
-      } else {
-        // some other error happened
-        console.log(error);
-      }
-    }
+    const {idToken} = await GoogleSignin.signIn();
+
+    // Create a Google credential with the token
+    const googleCredential = await auth.GoogleAuthProvider.credential(idToken);
+
+    // Sign-in the user with the credential
+    const res = await auth().signInWithCredential(googleCredential);
+    console.log(res);
   };
 
   return (
